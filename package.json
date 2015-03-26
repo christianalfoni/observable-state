@@ -1,0 +1,30 @@
+{
+  "name": "observable-state",
+  "version": "0.1.0",
+  "description": "Observables for creating reactive functional state in applications",
+  "main": "./src/obserable-state.js",
+  "scripts": {
+    "devtest": "./node_modules/nodeunit-watcher/bin/nodeunit-watcher ./test/immutable-store.js",
+    "test": "./node_modules/nodeunit/bin/nodeunit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/christianalfoni/observable-state.git"
+  },
+  "keywords": [
+    "reactive",
+    "frp",
+    "state",
+    "observable"
+  ],
+  "author": "Christian Alfoni",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/christianalfoni/observable-state/issues"
+  },
+  "homepage": "https://github.com/christianalfoni/observable-state",
+  "devDependencies": {
+    "es6-promise": "^2.0.1",
+    "nodeunit": "^0.9.1"
+  }
+}
