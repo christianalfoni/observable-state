@@ -2,7 +2,7 @@
   "name": "observable-state",
   "version": "0.1.0",
   "description": "Observables for creating reactive functional state in applications",
-  "main": "./src/obserable-state.js",
+  "main": "src/observable-state.js",
   "scripts": {
     "devtest": "./node_modules/nodeunit-watcher/bin/nodeunit-watcher ./test/immutable-store.js",
     "test": "./node_modules/nodeunit/bin/nodeunit"
