@@ -1,6 +1,6 @@
 {
   "name": "observable-state",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Observables for creating reactive functional state in applications",
   "main": "src/observable-state.js",
   "scripts": {
