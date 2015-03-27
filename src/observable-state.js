@@ -201,12 +201,6 @@ var ObservableProto = {
 
 var Observable = function (value) {
 
-  if (typeof value === 'function') {
-    return createLiftedFunction(value, {
-      apply: true
-    });
-  }
-
   var observable = Object.create(ObservableProto);
 
   observable.observers = [];
@@ -264,6 +258,12 @@ Observable.mergeValues = function () {
   });
 
   return mergedObservable;
+};
+
+Observable.lifted = function (func) {
+  return createLiftedFunction(func, {
+    apply: true
+  });
 };
 
 module.exports = Observable;
