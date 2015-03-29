@@ -10,9 +10,9 @@ var createLiftedFunction = function (cb, valueOperation) {
       }));
     };
     var observable = Observable(
-      (valueOperation && valueOperation.apply && liftedFunctionResult()) ||
-      (valueOperation && valueOperation.set) ||
-      (undefined)
+      valueOperation && valueOperation.apply ? liftedFunctionResult() :
+      valueOperation && 'set' in valueOperation ? valueOperation.set :
+      undefined
     );
     var setValue = function (value) {
 
