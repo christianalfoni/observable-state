@@ -222,12 +222,24 @@ var Observable = function (value) {
 };
 
 Observable.merge = function () {
-  var args = [].slice.call(arguments, 0);
-  var observable = Observable(args[0].get());
-  args.forEach(function (value) {
-    observable.observe(value, observable.set);
-  });
-  return observable;
+
+  // A map of observables
+  if (typeof arguments[0] === 'object' && !ObservableProto.isPrototypeOf(arguments[0])) {
+    var mapping = arguments[0];
+    var observables = Object.keys(mapping).map(function (key) {
+      return mapping[key].key(key);
+    });
+    return Observable.mergeValues.apply(this, observables);
+
+  // Passing multiple observables
+  } else {
+    var args = [].slice.call(arguments, 0);
+    var observable = Observable(args[0].get());
+    args.forEach(function (value) {
+      observable.observe(value, observable.set);
+    });
+    return observable;
+  }
 };
 
 Observable.mergeValues = function () {

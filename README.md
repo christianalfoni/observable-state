@@ -190,3 +190,35 @@ mergedObservable.onChange(function (value) {
 });
 observableB.set('foobar');
 ```
+
+You can also merge by using a map:
+```js
+var observableA = Observable('foo');
+var observableB = Observable('bar');
+var mergedObservable = Observable.merge({
+  c: observableA,
+  d: observableB
+});
+mergedObservable.get().c; // "foo"
+mergedObservable.onChange(function (value) {
+  value; // {c: 'foo', d: 'foobar'}
+});
+observableB.set('foobar');
+```
+
+#### Observable.mergeValues
+Lets you merge observables where the value is an object to one observable where the objects have been merged:
+```js
+var observableA = Observable({
+  foo: 'bar'
+});
+var observableB = Observable({
+  foo2: 'bar2'
+});
+var mergedObservable = Observable.mergeValues(observableA, observableB);
+mergedObservable.get().foo; // "bar"
+mergedObservable.onChange(function (value) {
+  value; // {foo: 'bar', foo2: 'foobar'}
+});
+observableB.set('foobar');
+```

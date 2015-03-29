@@ -84,7 +84,7 @@ exports['DEBOUNCE: Creates a new observable that waits set milliseconds and pass
   observableA.set('bar');
 };
 
-exports['MERGE: Creates a new observable observing multiple observables. The value is the observable being merged into.'] = function (test) {
+exports['MERGE: Creates a new observable observing multiple observables. The value is the first observable.'] = function (test) {
   var count = 0;
   var observableA = Observable('foo');
   var observableB = Observable('bar');
@@ -96,6 +96,28 @@ exports['MERGE: Creates a new observable observing multiple observables. The val
       test.equal(value, 'foo2');
     } else if (count === 2) {
       test.equal(value, 'bar2');
+      test.done();
+    }
+  });
+  observableA.set('foo2');
+  observableB.set('bar2');
+};
+
+exports['MERGE: Creates a new observable observing a map of observables'] = function (test) {
+  var count = 0;
+  var observableA = Observable('foo');
+  var observableB = Observable('bar');
+  var observableC = Observable.merge({
+    c: observableA,
+    d: observableB
+  });
+  test.equal(observableC.get().c, 'foo');
+  observableC.onChange(function (value) {
+    count++;
+    if (count === 1) {
+      test.equal(value.c, 'foo2');
+    } else if (count === 2) {
+      test.equal(value.d, 'bar2');
       test.done();
     }
   });
