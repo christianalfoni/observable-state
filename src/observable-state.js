@@ -1,5 +1,42 @@
-var BLOCK_RESULT = {};
-var ERROR_RESULT = {};
+var Observable = function (value) {
+
+  var observable = Object.create(ObservableProto);
+
+  observable.observers = [];
+  observable.observing = [];
+  observable.stopObserving = [];
+
+  observable.value = value;
+
+  observable.set = observable.set.bind(observable);
+  observable.setSync = observable.setSync.bind(observable);
+  observable.trigger = observable.trigger.bind(observable);
+
+  if (ObservableProto.isPrototypeOf(value)) {
+    value.onChange(observable.trigger);
+  }
+
+  return observable;
+};
+
+/*
+  ERROR
+  */
+Observable.Error = function (message, value) {
+  this.message = message;
+  this.value = value;
+};
+Observable.Error.prototype = {constructor: Observable.Error};
+
+/*
+  BLOCK
+  */
+Observable.Block = function (message, value) {};
+Observable.Block.prototype = {constructor: Observable.Block};
+
+/*
+  LIFTED FUNCTION
+  */
 var createLiftedFunction = function (cb, valueOperation) {
 
   return function () {
@@ -9,27 +46,31 @@ var createLiftedFunction = function (cb, valueOperation) {
         return ObservableProto.isPrototypeOf(value) ? value.get() : value;
       }));
     };
+    var noBlockers = !args.filter(function (value) {
+      return (ObservableProto.isPrototypeOf(value) ? value.get() : value) instanceof Observable.Block;
+    }).length;
     var observable = Observable(
-      valueOperation && valueOperation.apply ? liftedFunctionResult() :
+      valueOperation && valueOperation.apply && noBlockers ? liftedFunctionResult() :
       valueOperation && 'set' in valueOperation ? valueOperation.set :
       undefined
     );
     var setValue = function (value) {
 
       var result;
-      if (value === ERROR_RESULT.error) {
-        result = value;
+      if (value instanceof Observable.Error) {
+        result = valueOperation && valueOperation.canReceiveError ? liftedFunctionResult() : value;
       } else {
         try {
           result = liftedFunctionResult();
         } catch (err) {
-          ERROR_RESULT.error = err;
-          result = ERROR_RESULT;
+          result = new Observable.Error(err.message, value);
         }
       }
       if (result.then && typeof result.then === 'function') {
-        result.then(observable.setSync).catch(observable.triggerError);
-      } else if (result !== BLOCK_RESULT) {
+        result.then(observable.setSync).catch(function (err) {
+          observable.setSync(new Observable.Error(err, value));
+        });
+      } else if (!(result instanceof Observable.Block)) {
         observable.setSync(result);
       }
     };
@@ -58,12 +99,6 @@ var ObservableProto = {
     this.observers.forEach(function (observer) {
       observer(value);
     }, this);
-  },
-  triggerError: function (error) {
-    console.log('Trigging error', this.errorObservers, this);
-    this.errorObservers.forEach(function (observer) {
-      observer(error);
-    });
   },
   observe: function (value, cb) {
     var stopObserving = value.onChange(cb);
@@ -148,7 +183,7 @@ var ObservableProto = {
       if (cb(newValue)) {
         return newValue;
       } else {
-        return BLOCK_RESULT;
+        return new Observable.Block();
       }
     }, {
       apply: true
@@ -183,42 +218,18 @@ var ObservableProto = {
   },
   catch: function (cb) {
     var liftedFunction = createLiftedFunction(function (newValue) {
-      if (newValue === ERROR_RESULT) {
-        cb(ERROR_RESULT.error);
-        return BLOCK_RESULT;
+      if (newValue instanceof Observable.Error) {
+        cb(newValue);
+        return new Observable.Block();
       } else {
         return newValue;
       }
     }, {
-      set: this.value
+      set: this.value,
+      canReceiveError: true
     });
     return liftedFunction(this);
-  },
-  fromEventListener: function (event, element, options) {
-
   }
-};
-
-var Observable = function (value) {
-
-  var observable = Object.create(ObservableProto);
-
-  observable.observers = [];
-  observable.errorObservers = [];
-  observable.observing = [];
-  observable.stopObserving = [];
-
-  observable.value = value;
-
-  observable.set = observable.set.bind(observable);
-  observable.setSync = observable.setSync.bind(observable);
-  observable.trigger = observable.trigger.bind(observable);
-
-  if (ObservableProto.isPrototypeOf(value)) {
-    value.onChange(observable.trigger);
-  }
-
-  return observable;
 };
 
 Observable.merge = function () {

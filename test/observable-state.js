@@ -184,7 +184,7 @@ exports['PROMISE: Can map over promises'] = function (test) {
   observableA.set('bar');
 };
 
-exports['CATCH: Can catch errors and block further change propagation, but returns current value by default'] = function (test) {
+exports['CATCH: Can catch errors and current value and block further change propagation, but returns current value by default'] = function (test) {
 
   var observable = Observable('foo');
   var faultyObservable = observable.map(function (value) {
@@ -192,7 +192,29 @@ exports['CATCH: Can catch errors and block further change propagation, but retur
   })
   .catch(function (error) {
     test.equal(error.message, 'undefined is not a function');
+    test.equal(error.value, true);
     test.done();
   });
+  test.deepEqual(faultyObservable.get(), ['f', 'o', 'o']);
+  observable.set(true);
+};
+
+exports['CATCH: Can catch promises'] = function (test) {
+
+  var promise = function () {
+    return new Promise(function (resolve, reject) {
+      reject('error');
+    });
+  };
+  var observable = Observable('foo');
+  var faultyObservable = observable.promise(function (value) {
+    return promise();
+  })
+  .catch(function (error) {
+    test.equal(error.message, 'error');
+    test.equal(error.value, true);
+    test.done();
+  });
+  test.deepEqual(faultyObservable.get(), 'foo');
   observable.set(true);
 };
