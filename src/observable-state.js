@@ -219,8 +219,8 @@ var ObservableProto = {
   catch: function (cb) {
     var liftedFunction = createLiftedFunction(function (newValue) {
       if (newValue instanceof Observable.Error) {
-        cb(newValue);
-        return new Observable.Block();
+        var result = cb(newValue);
+        return result === undefined ? new Observable.Block() : result;
       } else {
         return newValue;
       }

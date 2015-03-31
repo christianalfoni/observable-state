@@ -218,3 +218,52 @@ exports['CATCH: Can catch promises'] = function (test) {
   test.deepEqual(faultyObservable.get(), 'foo');
   observable.set(true);
 };
+
+exports['CATCH: Does not propagate when returning undefined'] = function (test) {
+
+  var observable = Observable('foo');
+  var count = 0;
+  var faultyObservable = observable.map(function (value) {
+    return value.split('');
+  })
+  .catch(function (error) {
+    count++;
+    setTimeout(function () {
+      test.equal(error.message, 'undefined is not a function');
+      test.equal(error.value, true);
+      test.equal(count, 2);
+      test.done();
+    }, 0);
+  })
+  .map(function (value) {
+    count++;
+    return value.join('');
+  });
+  test.deepEqual(faultyObservable.get(), 'foo');
+  observable.set(true);
+};
+
+exports['CATCH: Does propagate when returning a value'] = function (test) {
+
+  var observable = Observable('foo');
+  var count = 0;
+  var faultyObservable = observable.map(function (value) {
+    return value.split('');
+  })
+  .catch(function (error) {
+    count++;
+    setTimeout(function () {
+      test.equal(error.message, 'undefined is not a function');
+      test.equal(error.value, true);
+      test.equal(count, 3);
+      test.done();
+    }, 0);
+    return true;
+  })
+  .map(function (value) {
+    count++;
+    return value.join('');
+  });
+  test.deepEqual(faultyObservable.get(), 'foo');
+  observable.set(true);
+};
